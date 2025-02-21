@@ -1,9 +1,3 @@
-web/*
-docker-legacy/*
-sdks/*
-images/*
-dev/*
-api/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
