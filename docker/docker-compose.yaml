@@ -418,7 +418,7 @@ services:
     networks:
       - ssrf_proxy_network
       - default
-      - reverse-proxy
+      #- reverse-proxy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.difyapi.rule=Host(`dify.savorcare.com`) && (Path(`/console/api`)||Path(`/api`)||Path(`/v1`)||Path(`/files`))"
@@ -468,7 +468,7 @@ services:
       - '3000'
     networks:
       - default
-      - reverse-proxy
+      #- reverse-proxy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.difyweb.rule=Host(`dify.savorcare.com`) && !(Path(`/console/api`)||Path(`/api`)||Path(`/v1`)||Path(`/files`))"
@@ -591,7 +591,7 @@ networks:
     internal: true
   milvus:
     driver: bridge
-  reverse-proxy:
+  default:
     name: reverse-proxy
     external: true
 
