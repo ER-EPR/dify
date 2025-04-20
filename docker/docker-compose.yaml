@@ -558,11 +558,11 @@ services:
       #- reverse-proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.difyweb.rule=Host(`dify.savorcare.com`) && !(PathPrefix(`/console/api`)||PathPrefix(`/api`)||PathPrefix(`/v1`)||PathPrefix(`/files`))"
+      - "traefik.http.routers.difyweb.rule=Host(`dify.savorcare.com`)"
       - "traefik.http.routers.difyweb.entrypoints=websecure"
       - "traefik.http.routers.difyweb.tls.certresolver=myresolver"
       - "traefik.http.routers.difywebhttp.middlewares=http2https"
-      - "traefik.http.routers.difywebhttp.rule=Host(`dify.savorcare.com`) && !(PathPrefix(`/console/api`)||PathPrefix(`/api`)||PathPrefix(`/v1`)||PathPrefix(`/files`))"
+      - "traefik.http.routers.difywebhttp.rule=Host(`dify.savorcare.com`)"
       - "traefik.http.routers.difywebhttp.entrypoints=web"
       - "traefik.docker.network=reverse-proxy"
 
@@ -671,6 +671,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.difyapi.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e`))"
+      - "traefik.http.routers.difyapi.entrypoints=websecure"
+      - "traefik.http.routers.difyapi.tls.certresolver=myresolver"
+      - "traefik.http.routers.difyapihttp.middlewares=http2https"
+      - "traefik.http.routers.difyapihttp.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e`))"
+      - "traefik.http.routers.difyapihttp.entrypoints=web"
+      - "traefik.docker.network=reverse-proxy"
 
   # ssrf_proxy server
   # for more information, please refer to
