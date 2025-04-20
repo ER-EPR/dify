@@ -674,11 +674,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.plugind.loadbalancer.server.port=5002"
-      - "traefik.http.routers.plugind.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e`))"
+      - "traefik.http.routers.plugind.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e/`))"
       - "traefik.http.routers.plugind.entrypoints=websecure"
       - "traefik.http.routers.plugind.tls.certresolver=myresolver"
       - "traefik.http.routers.plugindhttp.middlewares=http2https"
-      - "traefik.http.routers.plugindhttp.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e`))"
+      - "traefik.http.routers.plugindhttp.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e/`))"
       - "traefik.http.routers.plugindhttp.entrypoints=web"
       - "traefik.docker.network=reverse-proxy"
 
