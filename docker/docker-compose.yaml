@@ -673,12 +673,13 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.difyapi.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e`))"
-      - "traefik.http.routers.difyapi.entrypoints=websecure"
-      - "traefik.http.routers.difyapi.tls.certresolver=myresolver"
-      - "traefik.http.routers.difyapihttp.middlewares=http2https"
-      - "traefik.http.routers.difyapihttp.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e`))"
-      - "traefik.http.routers.difyapihttp.entrypoints=web"
+      - "traefik.http.services.plugind.loadbalancer.server.port=5002"
+      - "traefik.http.routers.plugind.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e`))"
+      - "traefik.http.routers.plugind.entrypoints=websecure"
+      - "traefik.http.routers.plugind.tls.certresolver=myresolver"
+      - "traefik.http.routers.plugindhttp.middlewares=http2https"
+      - "traefik.http.routers.plugindhttp.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e`))"
+      - "traefik.http.routers.plugindhttp.entrypoints=web"
       - "traefik.docker.network=reverse-proxy"
 
   # ssrf_proxy server
