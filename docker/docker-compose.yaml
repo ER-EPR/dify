@@ -762,11 +762,23 @@ services:
         condition: service_started
     volumes:
       # Mount the storage directory to the container, for storing user files.
-      - ./volumes/app/storage:/app/api/storage
+      - app:/app/api/storage
+    expose:
+      - '5001'
     networks:
       - ssrf_proxy_network
       - default
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.difyapi.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/console/api`)||PathPrefix(`/api`)||PathPrefix(`/v1`)||PathPrefix(`/files`))"
+      - "traefik.http.routers.difyapi.entrypoints=websecure"
+      - "traefik.http.routers.difyapi.tls.certresolver=myresolver"
+      - "traefik.http.routers.difyapi.tls.domains[0].main=savorcare.com"
+      - "traefik.http.routers.difyapi.tls.domains[0].sans=*.savorcare.com"
+      - "traefik.http.routers.difyapihttp.middlewares=http2https"
+      - "traefik.http.routers.difyapihttp.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/console/api`)||PathPrefix(`/api`)||PathPrefix(`/v1`)||PathPrefix(`/files`))"
+      - "traefik.http.routers.difyapihttp.entrypoints=web"
+      - "traefik.docker.network=reverse-proxy"
   # worker service
   # The Celery worker for processing all queues (dataset, workflow, mail, etc.)
   worker:
@@ -801,7 +813,7 @@ services:
         condition: service_started
     volumes:
       # Mount the storage directory to the container, for storing user files.
-      - ./volumes/app/storage:/app/api/storage
+      - app:/app/api/storage
     networks:
       - ssrf_proxy_network
       - default
@@ -864,6 +876,22 @@ services:
       ENABLE_WEBSITE_JINAREADER: ${ENABLE_WEBSITE_JINAREADER:-true}
       ENABLE_WEBSITE_FIRECRAWL: ${ENABLE_WEBSITE_FIRECRAWL:-true}
       ENABLE_WEBSITE_WATERCRAWL: ${ENABLE_WEBSITE_WATERCRAWL:-true}
+    expose:
+      - '3000'
+    networks:
+      - default
+      #- reverse-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.difyweb.rule=Host(`dify.savorcare.com`)"
+      - "traefik.http.routers.difyweb.entrypoints=websecure"
+      - "traefik.http.routers.difyweb.tls.certresolver=myresolver"
+      - "traefik.http.routers.difyweb.tls.domains[0].main=savorcare.com"
+      - "traefik.http.routers.difyweb.tls.domains[0].sans=*.savorcare.com"
+      - "traefik.http.routers.difywebhttp.middlewares=http2https"
+      - "traefik.http.routers.difywebhttp.rule=Host(`dify.savorcare.com`)"
+      - "traefik.http.routers.difywebhttp.entrypoints=web"
+      - "traefik.docker.network=reverse-proxy"
 
   # The PostgreSQL database.
   db_postgres:
@@ -885,7 +913,7 @@ services:
                -c 'statement_timeout=${POSTGRES_STATEMENT_TIMEOUT:-0}'
                -c 'idle_in_transaction_session_timeout=${POSTGRES_IDLE_IN_TRANSACTION_SESSION_TIMEOUT:-0}'
     volumes:
-      - ./volumes/db/data:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
     healthcheck:
       test:
         [
@@ -940,7 +968,7 @@ services:
       REDISCLI_AUTH: ${REDIS_PASSWORD:-difyai123456}
     volumes:
       # Mount the redis data directory to the container.
-      - ./volumes/redis/data:/data
+      - redis:/data
     # Set the redis password when startup redis server.
     command: redis-server --requirepass ${REDIS_PASSWORD:-difyai123456}
     healthcheck:
@@ -1044,6 +1072,18 @@ services:
       seekdb:
         condition: service_healthy
         required: false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.plugind.loadbalancer.server.port=5002"
+      - "traefik.http.routers.plugind.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e/`))"
+      - "traefik.http.routers.plugind.entrypoints=websecure"
+      - "traefik.http.routers.plugind.tls.certresolver=myresolver"
+      - "traefik.http.routers.plugind.tls.domains[0].main=savorcare.com"
+      - "traefik.http.routers.plugind.tls.domains[0].sans=*.savorcare.com"
+      - "traefik.http.routers.plugindhttp.middlewares=http2https"
+      - "traefik.http.routers.plugindhttp.rule=Host(`dify.savorcare.com`) && (PathPrefix(`/e/`))"
+      - "traefik.http.routers.plugindhttp.entrypoints=web"
+      - "traefik.docker.network=reverse-proxy"
 
   # ssrf_proxy server
   # for more information, please refer to
@@ -1095,6 +1135,8 @@ services:
   # used for reverse proxying the API service and Web service.
   nginx:
     image: nginx:latest
+    profiles:
+      - nginx
     restart: always
     volumes:
       - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template
@@ -1144,7 +1186,7 @@ services:
     restart: always
     volumes:
       # Mount the Weaviate data directory to the con tainer.
-      - ./volumes/weaviate:/var/lib/weaviate
+      - weaviate:/var/lib/weaviate
     environment:
       # The Weaviate configurations
       # You can refer to the [Weaviate](https://weaviate.io/developers/weaviate/config-refs/env-vars) documentation for more information.
@@ -1630,7 +1672,14 @@ networks:
   opensearch-net:
     driver: bridge
     internal: true
+  default:
+    name: reverse-proxy
+    external: true
 
 volumes:
   oradata:
+  app:
+  db:
+  redis:
+  weaviate:
   dify_es01_data:
